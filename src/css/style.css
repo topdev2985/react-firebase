@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=fallback');
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+
+/* Additional styles */
+@import 'additional-styles/utility-patterns.css';
+@import 'additional-styles/range-slider.css';
+@import 'additional-styles/toggle-switch.css';
+@import 'additional-styles/theme.css';
+
+@import 'tailwindcss/utilities';
+
+/* Additional Tailwind directives: https://tailwindcss.com/docs/functions-and-directives/#responsive */
+@layer utilities {
+    .rtl {
+        direction: rtl;
+    }
+}
+
+/* See Alpine.js: https://github.com/alpinejs/alpine#x-cloak */
+[x-cloak=""] {
+    display: none;
+}
+
+.text-orange {
+    color: #f47064;
+}
+
+.text-linethrough {
+    text-decoration: line-through;
+}
+
+.text-dark {
+    color: black;
+}
+
+.logo {
+    margin-right: auto;
+    margin-left: auto;
+    height: 40px;
+    width: auto;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.mb-res {
+    width: auto;
+}
+
+.justify-con {
+    justify-content: space-between;
+}
+
+@media(max-width: 768px) {
+    .mb-res {
+        width: 40%;
+    }
+}
+
+.mb-btn-show {
+    display: block;
+}
+
+.mb-btn-hide {
+    display: none;
+}
+
+.picdetail-height {
+    height: 500px;
+}
+
+@media(max-width: 900px) {
+    .picdetail-height {
+        height: 650px;
+    }
+}
+
+@media(max-width: 600px) {
+    .mb-btn-show {
+        display: none;
+    }
+
+    .mb-btn-hide {
+        display: flex;
+    }
+
+    .picdetail-height {
+        height: 450px;
+    }
+}
+
+.todo__list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    border: 1px solid lightgray;
+    margin-bottom: 10px !important;
+}
+
+.App {
+    display: grid;
+    place-items: center;
+}
+
+.mb-h{
+    height:16rem
+}
+
+.fonth{
+    font-size: 25px;
+}
+
+@media(max-width:450px){
+    .mb-h{
+        height:11rem
+    }
+    .picdetail-height {
+        height: 340px;
+    }
+    .fonth{
+        font-size: 18px;
+    }
+}
