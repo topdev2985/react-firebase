@@ -123,3 +123,10 @@
         font-size: 18px;
     }
 }
+
+/* .css-1d3z3hw-MuiOutlinedInput-notchedOutline{
+    border-width: 2px !important;
+} */
+.Mui-error .MuiOutlinedInput-notchedOutline {
+    border-width: 2px !important;
+}

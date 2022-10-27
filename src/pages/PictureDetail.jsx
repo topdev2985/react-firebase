@@ -15,6 +15,10 @@ import { collection, onSnapshot, query, doc, addDoc, serverTimestamp } from 'fir
 import { db, storage } from '../firebase.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { LinearProgress } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import Alert from '@mui/material/Alert';
+import isEmail from 'validator/lib/isEmail';
+import OutlinedInput from '@mui/material/OutlinedInput';
 
 const ColorButton = styled(Button)(({ theme }) => ({
     color: 'white',
@@ -116,20 +120,24 @@ export default function () {
             })))
         });
     }, [])
-
+    const [wa, setWa] = useState(false);
+    const [isValid, setIsValid] = useState(false); //email validate
+    const [dirty, setDirty] = useState(false);
+    const [checksubmit, setChecksubmit] = useState(false);
     const checkValues = function () {
-        if (sschool != '' && ssize != '' && splaque != '' && playername != '' && email != '' && image != '' && sign != '') return true;
-        else return false;
+        if (sschool != '' && ssize != '' && splaque != '' && playername != '' && email != '' && image != '' && isValid) return true;
+        else {
+            setWa(true);
+            setChecksubmit(true);
+            return false;
+        }
     }
-    const [imageurl, setImageurl]=useState('');
-    const [signurl, setSignurl]=useState('');
+    const [imageurl, setImageurl] = useState('');
+    const [signurl, setSignurl] = useState('');
     const addData = function () {
-        
 
         const sotrageRef1 = ref(storage, `/playerimages/${id}_${image.name}`);
         const uploadTask1 = uploadBytesResumable(sotrageRef1, image);
-        const sotrageRef2 = ref(storage, `/playersignature/${id}_${sign.name}`);
-        const uploadTask2 = uploadBytesResumable(sotrageRef2, sign);
         uploadTask1.on(
             "state_changed",
             (snapshot) => {
@@ -144,11 +152,18 @@ export default function () {
                 // download url
                 getDownloadURL(uploadTask1.snapshot.ref).then((url) => {
                     setImageurl(url);
-                  
+
                 });
                 setProgressimg(0);
             }
         );
+
+        if (sign === '') {
+            setSignurl('--');
+            return;
+        }
+        const sotrageRef2 = ref(storage, `/playersignature/${id}_${sign.name}`);
+        const uploadTask2 = uploadBytesResumable(sotrageRef2, sign);
         uploadTask2.on(
             "state_changed",
             (snapshot) => {
@@ -165,15 +180,15 @@ export default function () {
                 getDownloadURL(uploadTask2.snapshot.ref).then((url) => {
                     // console.log(url);
                     setSignurl(url);
-                  
+
                 });
                 setProgresssign(0);
             }
         );
 
     }
-    useEffect(()=>{
-        if(imageurl!=''&&signurl!=''){
+    useEffect(() => {
+        if (imageurl != '' && signurl != '') {
             addDoc(collection(db, 'orders'), {
                 picname: pic.name,
                 picid: id,
@@ -183,10 +198,10 @@ export default function () {
                 plaque: splaque.name,
                 playername: playername,
                 email: email,
-                sign: sign.name,
+                sign: sign != '' ? sign.name : '',
                 image: image.name,
-                imageurl:imageurl,
-                signurl:signurl,
+                imageurl: imageurl,
+                signurl: signurl,
                 timestamp: serverTimestamp()
             });
             navigate('/submit')
@@ -204,7 +219,7 @@ export default function () {
             <div className='mt-3'>
                 <Grid container spacing={1} columns={{ xs: 3, sm: 3, md: 12 }} className=" ">
                     <Grid item xs={3} sm={3} md={6} className="">
-                        <h5 className='h5 ml-5'>Snap Shot Colleage</h5>
+                        <h5 className='h5 ml-5'>{pic.name}</h5>
                         <div className='m-10'>
 
                             <div className='w-full h-full relative picdetail-height'>
@@ -223,22 +238,33 @@ export default function () {
 
                     </Grid>
                     <Grid item xs={3} sm={3} md={6}>
+
                         <div className='flex flex-col mx-auto p-3'>
                             <FormControl>
+                                <InputLabel id="demo-simple-select-label">Select School <span style={{ color: 'red' }}>*</span></InputLabel>
                                 <Select
                                     fullWidth
                                     className='w-full mb-2'
-                                    size='small'
+                                    // size='small'
                                     onChange={e => {
                                         setSschool(e.target.value)
                                     }}
                                     value={sschool}
+                                    label="School name"
+                                    labelId="demo-simple-select-label"
+
                                 >
+
                                     {schools.map((e, i) => <MenuItem value={e.item.name} key={i}>{e.item.name}</MenuItem>)}
                                 </Select>
                             </FormControl>
-                            <Paper variant='' className='flex flex-col p-2 mb-2'>
-                                <h4 className='text-center mb-4'>Select Size</h4>
+                            <Paper variant=''
+                                sx={{
+                                    border: '1px solid',
+                                    borderColor: (wa&ssize==='')?'red':'#c4c4c4'
+                                }}
+                                className='flex flex-col p-2 mb-2'>
+                                <h4 className='text-center mb-4'>Select Size <span style={{ color: 'red' }}>*</span></h4>
                                 <div className='grid grid-flow-row-dense grid-cols-3'>
                                     {
                                         sizes.map((e, i) => <div key={i} className="col-span-1 m-1">
@@ -260,8 +286,8 @@ export default function () {
                                 </div>
 
                             </Paper>
-                            <Paper variant='' className='flex flex-col p-2 mb-2'>
-                                <h4 className='text-center mb-4'>Select Plaque Type</h4>
+                            <Paper variant='' sx={{ border: '1px solid', borderColor: '#c4c4c4' }} className='flex flex-col p-2 mb-2'>
+                                <h4 className='text-center mb-4'>Select Plaque Type <span style={{ color: 'red' }}>*</span></h4>
                                 <div className='grid grid-flow-row-dense grid-cols-3 '>
                                     {
                                         plaques.map((e, i) => <div key={i} className="col-span-1 m-1">
@@ -284,7 +310,8 @@ export default function () {
                             </Paper>
 
                             <TextField
-                                label="Player Name"
+                                // required
+                                label={<span>Player Name <span style={{ color: 'red' }}>*</span></span>}
                                 placeholder='Enter Player Name'
                                 size='small'
                                 variant="outlined"
@@ -295,13 +322,14 @@ export default function () {
                                     setPlayername(e.target.value)
                                 }}
                                 value={playername}
+
                             />
                             <LinearProgress color="secondary" style={{ display: progressimg == 0 ? 'none' : 'block' }} variant="determinate" value={progressimg} />
                             <ColorButton variant="contained" component="label" sx={{
                                 marginBottom: '0.5rem',
                                 marginTop: '0.4rem'
                             }}>
-                                {image != '' ? image.name : 'Upload Image of Player'}
+                                {image != '' ? image.name : 'Upload Image of Player *'}
                                 <input
                                     hidden
                                     accept="image/*"
@@ -310,6 +338,7 @@ export default function () {
                                         setImage(e.target.files[0])
                                         // console.log(e.target.value)
                                     }}
+                                    required
                                 // value={image.value}
                                 />
                             </ColorButton>
@@ -329,46 +358,53 @@ export default function () {
                                 />
                             </ColorButton>
                             <TextField
-                                label="Email Address"
-                                placeholder='Enter Email of Purchaser'
+                                onBlur={() => setDirty(true)}
+                                error={dirty && isValid === false}
+                                label={<span>Email Address <span style={{ color: 'red' }}>*</span></span>}
+                                placeholder='Enter Your Email'
                                 size='small'
-                                variant="outlined"
                                 sx={{
-                                    marginBottom: '0.5rem'
+                                    marginBottom: '0.5rem',
+                                    // border:'2px solid'
+                                    borderWidth: '2px'
                                 }}
                                 onChange={e => {
+                                    let val = e.target.value;
+                                    if (isEmail(val)) {
+                                        setIsValid(true);
+                                    } else {
+                                        setIsValid(false);
+                                    }
                                     setEmail(e.target.value)
                                 }}
                                 value={email}
+                                inputlabelprops={{
+                                    shrink: true,
+                                }}
+                            // required
+
                             />
                             <p className='mb-4'>
                                 <span style={{ textDecoration: 'line-through' }}>${Number(pic.oldprice) + Number(ssize.price) + Number(splaque.price)}</span>
                                 <span style={{ color: 'green' }}> ${Number(pic.price) + Number(ssize.price) + Number(splaque.price)}</span>
                             </p>
+                            <Alert severity="warning" style={{ display: wa ? 'flex' : 'none' }} className="mb-5">Please fill all <span style={{ color: 'red' }}>*</span> fileds</Alert>
                             <ColorButton
                                 type='submit'
                                 size='large'
-                                // sx={{
-                                //     backgroundColor:'#d86937',
-                                //     color:'white'
-                                // }}
                                 variant='contained'
                                 color='success'
-                                component={Link}
-                                to='/submit'
+
                                 onClick={e => {
                                     e.preventDefault();
                                     if (!checkValues()) return;
                                     addData();
-                                    // navigate('/submit')
                                 }}
                             >
                                 Submit
                             </ColorButton>
-
-
-
                         </div>
+
                     </Grid>
                 </Grid>
             </div>
